@@ -16,7 +16,6 @@ Sebuah aplikasi desktop sederhana untuk manajemen booking janji temu dokter di K
 - [Struktur Proyek](#struktur-proyek)
 - [Cara Menginstal dan Menjalankan](#cara-menginstal-dan-menjalankan)
 - [Penggunaan API Key (Penting!)](#penggunaan-api-key-penting)
-- [Perancangan Class Diagram](#perancangan-class-diagram)
 - [Kontribusi](#kontribusi)
 - [Lisensi](#lisensi)
 - [Kontak](#kontak)
