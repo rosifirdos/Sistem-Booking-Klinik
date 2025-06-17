@@ -1,0 +1,35 @@
+# .gitignore
+
+# Python specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+dist/
+.venv/
+venv/
+env/
+*.egg-info/
+.tox/
+.ipynb_checkpoints/
+
+# IDEs and other tools
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# PyInstaller
+*.spec
+
+# Database
+*.db
+*.sqlite3
+
+# API Keys / Configuration files (IMPORTANT: Keep these out of version control!)
+config.py
+secrets.py
+api_keys.py
+.env
