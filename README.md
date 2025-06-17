@@ -151,4 +151,4 @@ Kontak
 Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi saya:
 Nama: Awanda Rosi Firdaus
 Email: awandarosifirdaus@gmail.com
-GitHub: 
+GitHub: https://github.com/rosifirdos
