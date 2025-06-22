@@ -1,6 +1,6 @@
 # Sistem Booking Dokter Klinik Awan
 
-![Python](https://img.shields.io/badge/Python-3.x-blue?style=flat&logo=python)
+![Python](https://img.shields.io/badge/Python-3.13-blue?style=flat&logo=python)
 ![PyQt5](https://img.shields.io/badge/GUI-PyQt5-green?style=flat&logo=qt)
 ![SQLite](https://img.shields.io/badge/Database-SQLite-lightgrey?style=flat&logo=sqlite)
 ![Google Gemini API](https://img.shields.io/badge/AI-Google_Gemini_API-red?style=flat&logo=google)
