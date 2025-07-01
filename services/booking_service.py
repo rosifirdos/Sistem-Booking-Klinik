@@ -1,9 +1,6 @@
 import logging
 from PyQt5.QtCore import QDate # Asumsi QDate digunakan untuk tanggal dalam main.py
-
-# Pastikan Anda memiliki modul database.py yang sesuai
-# dari mana DatabaseManager diimpor
-# from database import DatabaseManager 
+from datetime import datetime, timedelta # Import datetime dan timedelta untuk perhitungan tanggal
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -35,24 +32,44 @@ class BookingService:
                 cursor.execute("SELECT DoctorID, Name FROM Doctors")
                 doctors = cursor.fetchall()
 
-                # Tambahkan jadwal untuk setiap dokter
+                # --- START PERUBAHAN PENTING DI SINI ---
                 schedules_data = []
-                today = QDate.currentDate() # Gunakan QDate untuk konsistensi
                 
-                for doc_id, doc_name in doctors:
-                    # Contoh jadwal untuk beberapa hari ke depan
-                    for i in range(5): # Jadwal untuk 5 hari ke depan
-                        schedule_date = today.addDays(i).toString("yyyy-MM-dd")
-                        if doc_name == "dr. Budi Santoso" or doc_name == "dr. Surya Perkasa": # Dokter Umum
-                            schedules_data.append((doc_id, schedule_date, "09:00", "12:00", 0))
-                            schedules_data.append((doc_id, schedule_date, "14:00", "17:00", 0))
-                        elif doc_name == "drg. Citra Dewi" or doc_name == "drg. Dewi Lestari": # Dokter Gigi
-                            schedules_data.append((doc_id, schedule_date, "10:00", "13:00", 0))
-                            schedules_data.append((doc_id, schedule_date, "15:00", "18:00", 0))
+                # Mendapatkan tanggal hari ini (Python datetime)
+                today_dt = datetime.now().date()
+                
+                # Mendapatkan tanggal target (30 November 2025)
+                # Anda bisa mengubah tahun sesuai kebutuhan, saat ini disetel 2025.
+                target_date_dt = datetime(2025, 11, 30).date() 
+
+                # Loop dari hari ini hingga tanggal target
+                current_date = today_dt
+                while current_date <= target_date_dt:
+                    # Pastikan kita tidak menambahkan jadwal di hari Minggu jika itu adalah hari libur klinik.
+                    # Asumsi 0=Senin, 6=Minggu. Jika Minggu adalah hari libur, uncomment baris ini:
+                    # if current_date.weekday() == 6: # 6 adalah hari Minggu
+                    #     current_date += timedelta(days=1)
+                    #     continue # Lewati hari Minggu
+
+                    schedule_date_str = current_date.strftime("%Y-%m-%d") # Format ke YYYY-MM-DD
+                    
+                    # Tambahkan jadwal untuk setiap dokter pada tanggal ini
+                    for doc_id, doc_name in doctors:
+                        if doc_name in ("dr. Budi Santoso", "dr. Surya Perkasa"): # Dokter Umum
+                            schedules_data.append((doc_id, schedule_date_str, "09:00", "12:00", 0))
+                            schedules_data.append((doc_id, schedule_date_str, "14:00", "17:00", 0))
+                        elif doc_name in ("drg. Citra Dewi", "drg. Dewi Lestari"): # Dokter Gigi
+                            schedules_data.append((doc_id, schedule_date_str, "10:00", "13:00", 0))
+                            schedules_data.append((doc_id, schedule_date_str, "15:00", "18:00", 0))
                         elif doc_name == "dr. Ana Maria": # Dokter Anak
-                            schedules_data.append((doc_id, schedule_date, "08:30", "11:30", 0))
-                            schedules_data.append((doc_id, schedule_date, "13:30", "16:30", 0))
-                            
+                            schedules_data.append((doc_id, schedule_date_str, "08:30", "11:30", 0))
+                            schedules_data.append((doc_id, schedule_date_str, "13:30", "16:30", 0))
+                    
+                    # Maju ke hari berikutnya
+                    current_date += timedelta(days=1)
+                
+                # --- END PERUBAHAN PENTING DI SINI ---
+
                 logging.info(f"Inserting {len(schedules_data)} initial schedule entries...")
                 cursor.executemany("INSERT INTO Schedules (DoctorID, Date, StartTime, EndTime, IsBooked) VALUES (?, ?, ?, ?, ?)", schedules_data)
                 conn.commit()
@@ -120,8 +137,24 @@ class BookingService:
             return []
         finally:
             conn.close()
+            
+    def get_doctor_by_id(self, doctor_id):
+        """Mengambil data dokter berdasarkan ID."""
+        conn = self.db_manager.get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT DoctorID, Name, Specialty FROM Doctors WHERE DoctorID = ?", (doctor_id,))
+            doctor = cursor.fetchone()
+            if doctor:
+                return {"id": doctor[0], "name": doctor[1], "specialty": doctor[2]}
+            return None
+        except Exception as e:
+            logging.error(f"Error getting doctor by ID {doctor_id}: {e}")
+            return None
+        finally:
+            conn.close()
 
-    def get_doctor_schedules(self, doctor_id, date, include_booked=True):
+    def get_doctor_schedules(self, doctor_id, date, include_booked=False): # Ubah default include_booked menjadi False
         """
         Mengambil jadwal dokter untuk tanggal tertentu.
         Jika include_booked=False, hanya jadwal yang belum terisi akan dikembalikan.
